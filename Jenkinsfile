@@ -2,4 +2,4 @@
 
 env.COMPONENT="cart"
 
-cart(COMPONENT)
+nodejs(COMPONENT)
