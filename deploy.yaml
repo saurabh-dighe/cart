@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-deploy
+  labels:
+    app: cart
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cart
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+     maxUnavailable: 2
+  template:
+    metadata:
+      labels:
+        app: cart
+    spec:
+      containers:
+      - name: cart
+        image: 992382386864.dkr.ecr.us-east-1.amazonaws.com/cart:300
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        envFrom: 
+          - configMapRef: 
+              name: cart-cm
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cart-cm
+data:
+  REDIS_HOST: "roboshop-dev-redis.fil0fy.0001.use1.cache.amazonaws.com:6379"
+  CATALOGUE_HOST: "catalogue-svc"
+---
+#NodePort service
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-svc
+spec:
+  selector:
+    app: cart
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+#HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cart-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cart
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75
