@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: cart
-        image: 992382386864.dkr.ecr.us-east-1.amazonaws.com/cart:301
+        image: 992382386864.dkr.ecr.us-east-1.amazonaws.com/cart:500
         ports:
         - containerPort: 8080
         #livenessProbe
@@ -91,4 +91,3 @@ spec:
       target:
         type: Utilization
         averageUtilization: 75
-        
